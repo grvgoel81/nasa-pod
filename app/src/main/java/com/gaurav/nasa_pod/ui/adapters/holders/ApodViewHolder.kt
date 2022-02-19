@@ -1,0 +1,139 @@
+package com.gaurav.nasa_pod.ui.adapters.holders
+
+import android.annotation.SuppressLint
+import android.net.http.SslError
+import android.view.View
+import android.webkit.*
+import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Callback
+import com.squareup.picasso.Picasso
+import com.gaurav.nasa_pod.R
+import com.gaurav.nasa_pod.api.MediaType
+import com.gaurav.nasa_pod.data.model.Apod
+import com.gaurav.nasa_pod.databinding.HomeListItemBinding
+import com.gaurav.nasa_pod.util.CustomClickListener
+import com.gaurav.nasa_pod.util.DateUtil
+
+class ApodViewHolder(private val binding: HomeListItemBinding) :
+    RecyclerView.ViewHolder(binding.root) {
+    private lateinit var delegate: ItemDelegate
+    lateinit var item: Apod
+
+    interface ItemDelegate {
+        fun itemChanged(apod: Apod)
+        fun itemClicked(item: Apod)
+    }
+
+    fun setDelegate(delegate: ItemDelegate) {
+        this.delegate = delegate
+    }
+
+
+    fun bind(item: Apod) {
+        if (this::item.isInitialized && item.id == this.item.id) {
+            return
+        }
+
+        this.item = item
+        binding.apply {
+            isNew = item.date == DateUtil.todayDate()
+            titleTxtView.text = item.title
+            isFavorite = item.favorite
+            type = item.mediaType
+
+            isLoading = true
+            if (item.mediaType == MediaType.IMAGE.type) {
+                fetchImage(item.url)
+            } else {
+                fetchVideo(item.url)
+            }
+        }
+    }
+
+    private fun fetchImage(url: String) {
+        Picasso.get().load(url).fit().placeholder(R.drawable.placeholder_image)
+            .error(R.drawable.ic_error).into(binding.imageImgView, object : Callback {
+                override fun onSuccess() {
+                    binding.isLoading = false
+                }
+
+                override fun onError(e: Exception?) {
+                    binding.isLoading = false
+                }
+            })
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun fetchVideo(url: String) {
+        val videoFrame =
+            "<html><body><iframe width=\"100%\" height=\"100%\" src=\"${url}\" frameborder=\"0\" allowfullscreen></iframe></body></html>"
+        binding.webView.settings.javaScriptEnabled = true
+
+        binding.webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+                binding.loading.visibility = View.INVISIBLE
+                view.loadUrl(url)
+                return true
+            }
+
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                binding.loading.visibility = View.INVISIBLE
+            }
+
+            override fun onReceivedHttpError(
+                view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?
+            ) {
+                setErrorWebView()
+            }
+
+            override fun onReceivedSslError(
+                view: WebView?, handler: SslErrorHandler?, error: SslError?
+            ) {
+                setErrorWebView()
+            }
+
+            override fun onReceivedError(
+                view: WebView?, request: WebResourceRequest?, error: WebResourceError?
+            ) {
+                setErrorWebView()
+            }
+        }
+        binding.webView.loadData(videoFrame, "text/html", "utf-8")
+    }
+
+    fun setErrorWebView() {
+        binding.loading.visibility = View.INVISIBLE
+        val defaultErrorPagePath = "file:///android_asset/html/default_error_page_simple.html"
+        binding.webView.loadUrl(defaultErrorPagePath)
+        binding.webView.invalidate()
+    }
+
+    private fun toggleFavorite() {
+        item.favorite = !item.favorite
+        binding.favoriteImgView.setFavorite(item.favorite)
+        binding.favoriteImgView.startAnimation()
+        binding.isFavorite = item.favorite
+        delegate.itemChanged(item)
+    }
+
+    init {
+        binding.favoriteImgView.setOnClickListener {
+            toggleFavorite()
+        }
+
+        binding.contentView.setOnClickListener(object : CustomClickListener() {
+            override fun onDoubleClick(v: View) {
+                toggleFavorite()
+            }
+
+            override fun onSingleClick(v: View) {
+                navigateToApodDetails(item)
+            }
+        })
+    }
+
+    private fun navigateToApodDetails(apod: Apod) {
+        delegate.itemClicked(apod)
+    }
+}

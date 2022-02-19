@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <import type="com.gaurav.nasa_pod.api.MediaType" />
+
+        <import type="com.gaurav.nasa_pod.ui.component.FavoriteImageView" />
+
+        <variable
+            name="type"
+            type="String" />
+
+        <variable
+            name="isNew"
+            type="boolean" />
+
+        <variable
+            name="isLoading"
+            type="boolean" />
+
+        <variable
+            name="isFavorite"
+            type="boolean" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="10dp"
+        app:cardCornerRadius="5pt">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/darker_gray">
+
+            <WebView
+                android:id="@+id/webView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="2dp"
+                android:visibility="@{type.equals(MediaType.VIDEO.type) ? View.VISIBLE : View.INVISIBLE}"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imageImgView"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_centerHorizontal="true"
+                android:background="@android:color/darker_gray"
+                android:contentDescription="@string/image_description"
+                android:visibility="@{type.equals(MediaType.IMAGE.type) ? View.VISIBLE : View.INVISIBLE}"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/newImgView"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginBottom="4dp"
+                android:contentDescription="@string/image_description"
+                android:padding="8dp"
+                android:src="@drawable/ic_new"
+                android:visibility="@{isNew ? View.VISIBLE : View.GONE}" />
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/loading"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:indeterminate="true"
+                android:indeterminateBehavior="repeat"
+                android:indeterminateTint="@color/Apod_gray_50"
+                android:visibility="@{isLoading ? View.VISIBLE : View.GONE}" />
+
+            <TextView
+                android:id="@+id/titleTxtView"
+                style="@style/titleTxt"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/imageImgView"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:fontFamily="@font/ubuntumono_bold_italic"
+                android:gravity="center"
+                android:lines="3"
+                android:textAlignment="center"
+                android:textColor="#455A64"
+                android:textSize="15sp"
+                tools:text="sample title" />
+
+            <RelativeLayout
+                android:id="@+id/content_view"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <com.gaurav.nasa_pod.ui.component.FavoriteImageView
+                android:id="@+id/favoriteImgView"
+                android:layout_width="51dp"
+                android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="4dp"
+                android:contentDescription="@string/image_description"
+                android:padding="8dp"
+                android:src="@{isFavorite ? @drawable/ic_favorite : @drawable/ic_not_favorite}" />
+        </RelativeLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>
