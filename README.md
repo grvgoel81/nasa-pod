@@ -22,5 +22,5 @@ Kotlin
 
 ## What can be improved
 
-Adding StaggeredGridLayoutManager
-To monitor server current date abd base our request on it, instead of using local timezone.
+* Adding StaggeredGridLayoutManager
+* To monitor server current date abd base our request on it, instead of using local timezone.
